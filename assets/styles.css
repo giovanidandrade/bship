@@ -1,0 +1,58 @@
+body {
+    margin: 20px auto;
+    width: 60%;
+}
+
+#app {
+    display: flex;
+    justify-content: center;
+}
+
+#board {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+#header {
+    width: 100%;
+    padding-bottom: 10px;
+}
+
+.small-btn {
+    width: 20%;
+    border: 1px solid #999;
+}
+
+.active-btn {
+    background-color: grey;
+    color: white;
+}
+
+.row {
+    height: 34px;
+}
+
+.square {
+    background: #fff;
+    border: 1px solid #999;
+    height: 34px;
+    width: 34px;
+    padding: 0;
+}
+
+.hit-pokemon {
+    background-color: rgb(252, 40, 3);
+}
+
+.miss-pokemon {
+    background-color: rgb(206, 240, 245);
+}
+
+.mine-pokemon {
+    background-color: rgb(135, 173, 109);
+}
+
+.ship-pokemon {
+    background-color: rgb(53, 56, 52);
+}
