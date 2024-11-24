@@ -2,7 +2,32 @@ import { render } from "https://esm.sh/preact@10.7.2";
 import { useState } from "https://esm.sh/preact@10.7.2/hooks";
 import { html } from "https://esm.sh/htm@3.0.4/preact";
 
-const gen = genMetadata[4];
+let genNumber = 1;
+let gen = genMetadata[genNumber];
+
+function makeInitialBoard() {
+  return {
+    mode: user.hit,
+    left_board: new Array(gen.numberPokemon).fill(pokemon.normal),
+    right_board: new Array(gen.numberPokemon).fill(pokemon.normal),
+    // the exact value doesn't matter, this is just something I can use
+    // to dirty state and force an update
+    forceUpdate: false,
+  };
+}
+
+function changeGen(event, state, setState) {
+  genNumber = +event.target.value;
+  gen = genMetadata[genNumber];
+  setState({ mode: state.mode, ...makeInitialBoard() });
+}
+
+function transposeGen(state, setState) {
+  let rows = gen.rows;
+  gen.rows = gen.columns;
+  gen.columns = rows;
+  setState({ ...state, forceUpdate: !state.forceUpdate });
+}
 
 const user = {
   hit: "HIT",
@@ -17,12 +42,6 @@ const pokemon = {
   mine: "MINE",
   ship: "SHIP",
   normal: "NORMAL",
-};
-
-const INIT_BOARD = {
-  mode: user.hit,
-  left_board: new Array(gen.numberPokemon).fill(pokemon.normal),
-  right_board: new Array(gen.numberPokemon).fill(pokemon.normal),
 };
 
 function pokemonClick(state, setState, board, boardIndex) {
@@ -105,6 +124,19 @@ function clearAll(state, setState) {
   });
 }
 
+function MetaHeader(props) {
+  return html`<div id="meta-header" style="text-align: center">
+    <span>Generation: </span
+    ><input
+      type="number"
+      max="5"
+      min="1"
+      value=${genNumber}
+      onchange=${(evt) => changeGen(evt, props.state, props.setState)}
+    />
+  </div>`;
+}
+
 function Header(props) {
   const isActive = (mode, target) => (mode === target ? "active-btn" : "");
 
@@ -132,6 +164,12 @@ function Header(props) {
       onclick=${() => changeUserMode(props.state, props.setState, user.mine)}
     >
       Bomb
+    </button>
+    <button
+      className="small-btn"
+      onclick=${() => transposeGen(props.state, props.setState)}
+    >
+      Transpose
     </button>
     <button
       className="small-btn"
@@ -169,13 +207,13 @@ function Board(props) {
 }
 
 function App() {
-  const [state, setState] = useState(structuredClone(INIT_BOARD));
+  const [state, setState] = useState(makeInitialBoard());
 
   document.onkeydown = (event) => hotkeys(event, state, setState);
 
   return html`<div id="app">
     <div id="board">
-      ${Header({ state, setState })}
+      ${Header({ state, setState })} ${MetaHeader({ state, setState })}
       <div id="board2">
         ${Board({ state, setState, left: true })}
         ${Board({ state, setState, left: false })}

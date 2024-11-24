@@ -22,12 +22,19 @@ body {
 }
 
 #header {
-    width: 100%;
+    width: 90%;
+    margin: 0 auto;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-around;
+}
+
+#meta-header {
     padding-bottom: 10px;
 }
 
 .small-btn {
-    width: 20%;
+    width: 15%;
     border: 1px solid #999;
 }
 
