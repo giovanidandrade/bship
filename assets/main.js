@@ -2,6 +2,8 @@ import { render } from "https://esm.sh/preact@10.7.2";
 import { useState } from "https://esm.sh/preact@10.7.2/hooks";
 import { html } from "https://esm.sh/htm@3.0.4/preact";
 
+const gen = genMetadata[4];
+
 const user = {
   hit: "HIT",
   miss: "MISS",
@@ -17,13 +19,19 @@ const pokemon = {
   normal: "NORMAL",
 };
 
-function pokemonClick(state, setState, boardIndex) {
-  if (state.board[boardIndex] == pokemon.normal) {
-    const newBoard = state.board;
+const INIT_BOARD = {
+  mode: user.hit,
+  left_board: new Array(gen.numberPokemon).fill(pokemon.normal),
+  right_board: new Array(gen.numberPokemon).fill(pokemon.normal),
+};
+
+function pokemonClick(state, setState, board, boardIndex) {
+  if (board[boardIndex] == pokemon.normal) {
+    const newBoard = board;
     newBoard[boardIndex] = state.mode;
     setState({ ...state, board: newBoard });
   } else {
-    const newBoard = state.board;
+    const newBoard = board;
     newBoard[boardIndex] = pokemon.normal;
     setState({ ...state, board: newBoard });
   }
@@ -48,15 +56,22 @@ function getPokemonClass(pokemonState) {
   }
 }
 
+function preprocessDexNumber(number) {
+  const str = number.toString();
+  return ("000" + str).slice(-3);
+}
+
 function Square(props) {
-  const boardIndex = props.column + 12 * props.row;
-  const dexNumber = 494 + boardIndex;
-  const pokemonName = pokemonNames[boardIndex];
-  const klass = getPokemonClass(props.state.board[boardIndex]);
+  const boardIndex = props.column + gen.columns * props.row;
+  const dexNumber = preprocessDexNumber(gen.offset + boardIndex);
+  const pokemonName = gen.names[boardIndex];
+  const board = props.left ? props.state.left_board : props.state.right_board;
+  const klass = getPokemonClass(board[boardIndex]);
 
   return html`<button
     className="square ${klass}"
-    onclick=${() => pokemonClick(props.state, props.setState, boardIndex)}
+    onclick=${() =>
+      pokemonClick(props.state, props.setState, board, boardIndex)}
     title="${pokemonName}"
   >
     <img
@@ -68,7 +83,7 @@ function Square(props) {
 
 function Row(props) {
   const squares = [];
-  for (let i = 0; i < 12; ++i) {
+  for (let i = 0; i < gen.columns; ++i) {
     squares.push(Square({ column: i, ...props }));
   }
 
@@ -85,7 +100,8 @@ function changeUserMode(state, setState, newMode) {
 function clearAll(state, setState) {
   setState({
     ...state,
-    board: new Array(156).fill(pokemon.normal),
+    left_board: new Array(gen.numberPokemon).fill(pokemon.normal),
+    right_board: new Array(gen.numberPokemon).fill(pokemon.normal),
   });
 }
 
@@ -138,21 +154,33 @@ function hotkeys(event, state, setState) {
   }
 }
 
+function Board(props) {
+  const rows = [];
+  for (let i = 0; i < gen.rows; ++i) {
+    rows.push(
+      Row({
+        row: i,
+        ...props,
+      })
+    );
+  }
+
+  return html`<div>${rows}</div>`;
+}
+
 function App() {
-  const [state, setState] = useState({
-    mode: user.hit,
-    board: new Array(156).fill(pokemon.normal),
-  });
+  const [state, setState] = useState(structuredClone(INIT_BOARD));
 
   document.onkeydown = (event) => hotkeys(event, state, setState);
 
-  const rows = [];
-  for (let i = 0; i < 13; ++i) {
-    rows.push(Row({ row: i, state, setState }));
-  }
-
   return html`<div id="app">
-    <div id="board">${Header({ state, setState })}${rows}</div>
+    <div id="board">
+      ${Header({ state, setState })}
+      <div id="board2">
+        ${Board({ state, setState, left: true })}
+        ${Board({ state, setState, left: false })}
+      </div>
+    </div>
   </div>`;
 }
 

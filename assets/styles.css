@@ -1,6 +1,6 @@
 body {
     margin: 20px auto;
-    width: 60%;
+    width: 80%;
 }
 
 #app {
@@ -12,6 +12,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0;
+}
+
+#board2 {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
 }
 
 #header {
